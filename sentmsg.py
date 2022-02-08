@@ -1,4 +1,7 @@
+import sys
+from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager as CM
@@ -7,7 +10,18 @@ import sqlite3
 import time
 
 TIMEOUT = 60
-con = sqlite3.connect('database.db')
+
+
+def read_users():
+    con = sqlite3.connect('database.db')
+    curs = con.execute('SELECT name FROM accounts')
+    rows = curs.fetchall()
+    users = []
+    for row in rows:
+        users.append(row[0])
+    return users
+
+
 USERNAME = "cherepanovarnks1977-ui@rambler.ru"  # input('[info account] put your email or username:')
 PASSWORD = "_-nRTR1q)w"  # input('[info account] put your password here:')
 options = webdriver.ChromeOptions()
@@ -48,25 +62,24 @@ def login():
     login_button.click()
 
     time.sleep(3)
-    bot.get('https://www.instagram.com/direct/inbox/')
-    no = bot.find_elements_by_xpath('/html/body/div[5]/div/div/div/div[3]/button[2]')
-    for chk in no:
-        chk.click()
+    for user in read_users():
+        bot.get(f'https://www.instagram.com/{user}')
+        try:
+            follow_btn = bot.find_element(By.XPATH, '//*[@id="react-root"]/section/main/div/header/section/div[2]/div/div/div/span/span[1]/button')
+            follow_btn.click()
+            print('clicked follow btn')
+        except NoSuchElementException:
+            pass
 
-    time.sleep(3)
+        msg_btn = WebDriverWait(bot, 10).until(EC.presence_of_element_located((By.XPATH, '//button[@class="sqdOP  L3NKy    _8A5w5    "]')))
+        msg_btn.click()
 
-    no2 = bot.find_element(By.CSS_SELECTOR, 'div.RnEpo')
-    no2.click()
-    bot.get('https://www.instagram.com/direct/new/')
-    time.sleep(2)
-    accounts_element = WebDriverWait(bot, TIMEOUT).until(
-        EC.presence_of_element_located((
-            By.XPATH, '//*[@id="react-root"]/section/div[2]/div/div[1]/div/div[2]/input')))
-
-    accounts_element.send_keys("droop.deaddd")
-    click_final = bot.find_element(By.CSS_SELECTOR, 'div.-qQT3')
-    click_final.click()
-    time.sleep(2)
+        time.sleep(1)
+        input_field = bot.find_element(By.XPATH, '//textarea[@placeholder="Message..."]')
+        input_field.send_keys('Hello There, How are you.')
+        time.sleep(1)
+        input_field.send_keys(Keys.ENTER)
+        input()
 
 
 if __name__ == '__main__':
