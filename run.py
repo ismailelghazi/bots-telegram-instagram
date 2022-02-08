@@ -1,6 +1,5 @@
-import os
+import sqlite3
 import time
-import selenium
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -10,21 +9,49 @@ from selenium.webdriver.common.keys import Keys
 from webdriver_manager.chrome import ChromeDriverManager as CM
 
 # Complete these 2 fields ==================
-USERNAME = 'your instagram username'
-PASSWORD = 'your instagram password'
+USERNAME = input('[info account] put your email or username:')
+PASSWORD = input('[info account] put your password here:')
 # ==========================================
 
 TIMEOUT = 15
 
 
-def scrape():
-    usr = input('[Required] - Whose followers do you want to scrape: ')
+# CREATING DATABASE
+def createdb():
+    try:
+        con = sqlite3.connect("database.db")
+        curs = con.cursor()
+        curs.execute("""CREATE TABLE accounts(
+            id text NOT NULL PRIMARY KEY,
+            name text NOT NULL,
+            sent integer NOT NULL
+        )""")
+        con.commit()
+        con.close()
+        print(f'[INFO] DATABASE CREATED')
+    except sqlite3.OperationalError as e:
+        print(e)
+        print('DATABASE, operational')
 
-    user_input = int(
-        input('[Required] - How many followers do you want to scrape (60-500 recommended): '))
+
+def insertdb(id, name, sent):
+    try:
+        con = sqlite3.connect("database.db")
+        curs = con.cursor()
+        curs.execute("INSERT INTO accounts VALUES (?,?,?)", (id, name, sent))
+        con.commit()
+        con.close()
+        print(f'[INFO] Row Added To DATABASE, ID : {id}')
+    except sqlite3.OperationalError as e:
+        print(e)
+
+
+def scrape():
+    createdb()
+    usr = input('[Required] - Whose followers do you want to scrape: ')
+    user_input = int(input('[Required] - How many followers do you want to scrape (60-1000 recommended): '))
 
     options = webdriver.ChromeOptions()
-    # options.add_argument("--headless")
     options.add_argument('--no-sandbox')
     options.add_argument("--log-level=3")
     mobile_emulation = {
@@ -82,8 +109,7 @@ def scrape():
 
         time.sleep(2)
 
-        followers = bot.find_elements_by_xpath(
-            '//*[@id="react-root"]/section/main/div/ul/div/li/div/div[1]/div[2]/div[1]/a')
+        followers = bot.find_elements_by_xpath('//*[@id="react-root"]/section/main/div/ul/div/li/div/div[1]/div[2]/div[1]/a')
 
         # Getting url from href attribute
         for i in followers:
@@ -92,11 +118,11 @@ def scrape():
             else:
                 continue
 
-    print('[Info] - Saving...')
-    print('[DONE] - Your followers are saved in followers.txt file!')
+    for user in users:
+        print(user)
+        insertdb(f"{user}", f"{user}", 0)
 
-    with open('followers.txt', 'a') as file:
-        file.write('\n'.join(users) + "\n")
+    print('[Info] - Saving...')
 
 
 if __name__ == '__main__':
