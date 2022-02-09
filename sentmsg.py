@@ -83,21 +83,16 @@ def login():
         EC.presence_of_element_located((
             By.XPATH, '//*[@id="react-root"]/section/div[2]/div/div/div[2]/div/div/div[2]/button')))
         button_send.click()
+        con = sqlite3.connect('database.db')
+        curs = con.execute('SELECT name FROM accounts')
+        print("Connected to SQLite")
+
+        sql_update_query = f"""Update accounts set sent = 1 where name = {user}"""
+        curs.execute(sql_update_query)
+        con.commit()
+        print("Record Updated successfully ")
+        curs.close()
         time.sleep(20)
-        try:
-            con = sqlite3.connect('database.db')
-            curs = con.execute('SELECT name FROM accounts')
-            print("Connected to SQLite")
-
-            sql_update_query = f"""Update accounts set sent = 1 where name = {user}"""
-            curs.execute(sql_update_query)
-            con.commit()
-            print("Record Updated successfully ")
-            curs.close()
-
-        except sqlite3.Error as error:
-            print("Failed to update sqlite table", error)
-
 
 
 if __name__ == '__main__':
