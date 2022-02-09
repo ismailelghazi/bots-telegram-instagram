@@ -1,4 +1,3 @@
-import sys
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
@@ -22,8 +21,8 @@ def read_users():
     return users
 
 
-USERNAME = "cherepanovarnks1977-ui@rambler.ru"  # input('[info account] put your email or username:')
-PASSWORD = "_-nRTR1q)w"  # input('[info account] put your password here:')
+USERNAME = "droop.deaddd"  # input('[info account] put your email or username:')
+PASSWORD = "Ism55515+@123"  # input('[info account] put your password here:')
 options = webdriver.ChromeOptions()
 options.add_argument('--no-sandbox')
 options.add_argument("--log-level=3")
@@ -65,7 +64,7 @@ def login():
     for user in read_users():
         bot.get(f'https://www.instagram.com/{user}')
         try:
-            follow_btn = bot.find_element(By.XPATH, '//*[@id="react-root"]/section/main/div/header/section/div[2]/div/div/div/span/span[1]/button')
+            follow_btn = bot.find_element(By.XPATH, '//button/div[contains(text(), "Follow")]')
             follow_btn.click()
             print('clicked follow btn')
         except NoSuchElementException:
@@ -73,13 +72,32 @@ def login():
 
         msg_btn = WebDriverWait(bot, 10).until(EC.presence_of_element_located((By.XPATH, '//button[@class="sqdOP  L3NKy    _8A5w5    "]')))
         msg_btn.click()
-
         time.sleep(1)
-        input_field = bot.find_element(By.XPATH, '//textarea[@placeholder="Message..."]')
+        input_field = WebDriverWait(bot, TIMEOUT).until(
+        EC.presence_of_element_located((
+            By.XPATH, '//*[@id="react-root"]/section/div[2]/div/div/div[2]/div/div/div/textarea')))
+        time.sleep(1)
         input_field.send_keys('Hello There, How are you.')
         time.sleep(1)
-        input_field.send_keys(Keys.ENTER)
-        input()
+        button_send = WebDriverWait(bot, TIMEOUT).until(
+        EC.presence_of_element_located((
+            By.XPATH, '//*[@id="react-root"]/section/div[2]/div/div/div[2]/div/div/div[2]/button')))
+        button_send.click()
+        time.sleep(20)
+        try:
+            con = sqlite3.connect('database.db')
+            curs = con.execute('SELECT name FROM accounts')
+            print("Connected to SQLite")
+
+            sql_update_query = f"""Update accounts set sent = 1 where name = {user}"""
+            curs.execute(sql_update_query)
+            con.commit()
+            print("Record Updated successfully ")
+            curs.close()
+
+        except sqlite3.Error as error:
+            print("Failed to update sqlite table", error)
+
 
 
 if __name__ == '__main__':
