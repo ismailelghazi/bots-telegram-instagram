@@ -31,10 +31,9 @@ mobile_emulation = {
 options.add_experimental_option("mobileEmulation", mobile_emulation)
 
 bot = webdriver.Chrome(executable_path=Cm().install(), options=options)
-def check_element():
-    try:
-        
-    except
+
+
+
 
 def login():
     bot.get('https://www.instagram.com/accounts/login/')
@@ -65,47 +64,50 @@ def login():
 
     time.sleep(3)
     for user in read_users():
-        bot.get('https://www.instagram.com/')
-        time.sleep(random.uniform(2, 4))
-        bot.get(f'https://www.instagram.com/{user}/')
         try:
-            chek_private = WebDriverWait(bot, 10).until(
-                ec.presence_of_element_located(
-                    (By.XPATH, '//*[@id="react-root"]/section/main/div/div[2]/article/div[1]/div/h2')))
+            bot.get('https://www.instagram.com/')
             time.sleep(random.uniform(2, 4))
-            if chek_private.text == "This account is private":
-                print("here")
-            else:
+            bot.get(f'https://www.instagram.com/{user}/')
+            try:
+                chek_private = WebDriverWait(bot, 10).until(
+                    ec.presence_of_element_located(
+                        (By.XPATH, '//*[@id="react-root"]/section/main/div/div[2]/article/div[1]/div/h2')))
+                if chek_private.text == "This Account is Private":
+                    # time.sleep(random.uniform(2, 4))
+                    print("here")
+                    pass
+                pass
+            except :
                 follow_btn = bot.find_element(By.XPATH, '//button/div[contains(text(), "Follow")]')
                 follow_btn.click()
                 print('clicked follow btn')
-            msg_btn = WebDriverWait(bot, 10).until(
-                ec.presence_of_element_located((By.XPATH, '//button[@class="sqdOP  L3NKy    _8A5w5    "]')))
-            msg_btn.click()
-            time.sleep(random.uniform(5, 10))
-            input_field = WebDriverWait(bot, TIMEOUT).until(
-                ec.presence_of_element_located((
-                    By.XPATH, '//*[@id="react-root"]/section/div[2]/div/div/div[2]/div/div/div/textarea')))
-            time.sleep(random.uniform(5, 10))
-            print("[info...] type the input now ")
-            message = "Hello There, How are you."
-            for ch in message:
-                input_field.send_keys(ch)
-                time.sleep(0.5)
-            time.sleep(random.uniform(5, 10))
-            button_send = WebDriverWait(bot, TIMEOUT).until(
-                ec.presence_of_element_located((
-                    By.XPATH, '//*[@id="react-root"]/section/div[2]/div/div/div[2]/div/div/div[2]/button')))
-            button_send.click()
-            con = sqlite3.connect('database.db')
-            curs = con.execute('SELECT name FROM accounts')
-            print("Connected to SQLite")
-            sql_update_query = f"""Update accounts set sent = 1 where name = '{user}'"""
-            curs.execute(sql_update_query)
-            con.commit()
-            print("Record Updated successfully ")
-            curs.close()
-            time.sleep(random.uniform(10, 30))
+                msg_btn = WebDriverWait(bot, 10).until(
+                    ec.presence_of_element_located((By.XPATH, '//button[@class="sqdOP  L3NKy    _8A5w5    "]')))
+                msg_btn.click()
+                time.sleep(random.uniform(5, 10))
+                input_field = WebDriverWait(bot, TIMEOUT).until(
+                    ec.presence_of_element_located((
+                        By.XPATH, '//*[@id="react-root"]/section/div[2]/div/div/div[2]/div/div/div/textarea')))
+                time.sleep(random.uniform(5, 10))
+                print("[info...] type the input now ")
+                message = "Hello There, How are you."
+                for ch in message:
+                    input_field.send_keys(ch)
+                    time.sleep(0.5)
+                time.sleep(random.uniform(5, 10))
+                button_send = WebDriverWait(bot, TIMEOUT).until(
+                    ec.presence_of_element_located((
+                        By.XPATH, '//*[@id="react-root"]/section/div[2]/div/div/div[2]/div/div/div[2]/button')))
+                button_send.click()
+                con = sqlite3.connect('database.db')
+                curs = con.execute('SELECT name FROM accounts')
+                print("Connected to SQLite")
+                sql_update_query = f"""Update accounts set sent = 1 where name = '{user}'"""
+                curs.execute(sql_update_query)
+                con.commit()
+                print("Record Updated successfully ")
+                curs.close()
+                time.sleep(random.uniform(10, 30))
         except NoSuchElementException:
             pass
 
