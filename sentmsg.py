@@ -6,7 +6,8 @@ from webdriver_manager.chrome import ChromeDriverManager as Cm
 from selenium import webdriver
 import sqlite3
 import time
-import  random
+import random
+
 TIMEOUT = 60
 
 
@@ -30,7 +31,10 @@ mobile_emulation = {
 options.add_experimental_option("mobileEmulation", mobile_emulation)
 
 bot = webdriver.Chrome(executable_path=Cm().install(), options=options)
-
+def check_element():
+    try:
+        
+    except
 
 def login():
     bot.get('https://www.instagram.com/accounts/login/')
@@ -65,11 +69,12 @@ def login():
         time.sleep(random.uniform(2, 4))
         bot.get(f'https://www.instagram.com/{user}/')
         try:
-            chek_private = bot.find_element(By.XPATH, '//*[@id="react-root"]/section/main/div/div[2]/article/div[1]/div/h2')
-            print(chek_private.text)
+            chek_private = WebDriverWait(bot, 10).until(
+                ec.presence_of_element_located(
+                    (By.XPATH, '//*[@id="react-root"]/section/main/div/div[2]/article/div[1]/div/h2')))
             time.sleep(random.uniform(2, 4))
-            if(chek_private.text=="This account is private"):
-               print("here")
+            if chek_private.text == "This account is private":
+                print("here")
             else:
                 follow_btn = bot.find_element(By.XPATH, '//button/div[contains(text(), "Follow")]')
                 follow_btn.click()
