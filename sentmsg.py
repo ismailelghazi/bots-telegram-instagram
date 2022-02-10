@@ -65,24 +65,29 @@ def login():
         time.sleep(random.uniform(2, 4))
         bot.get(f'https://www.instagram.com/{user}/')
         try:
+            chek_private = bot.find_element(By.XPATH, '//*[@id="react-root"]/section/main/div/div[2]/article/div[1]/div/h2')
+            print(chek_private.text)
             time.sleep(random.uniform(2, 4))
-            follow_btn = bot.find_element(By.XPATH, '//button/div[contains(text(), "Follow")]')
-            follow_btn.click()
-            print('clicked follow btn')
+            if(chek_private.text=="This account is private"):
+               print("here")
+            else:
+                follow_btn = bot.find_element(By.XPATH, '//button/div[contains(text(), "Follow")]')
+                follow_btn.click()
+                print('clicked follow btn')
             msg_btn = WebDriverWait(bot, 10).until(
                 ec.presence_of_element_located((By.XPATH, '//button[@class="sqdOP  L3NKy    _8A5w5    "]')))
             msg_btn.click()
-            time.sleep(random.uniform(2, 4))
+            time.sleep(random.uniform(5, 10))
             input_field = WebDriverWait(bot, TIMEOUT).until(
                 ec.presence_of_element_located((
                     By.XPATH, '//*[@id="react-root"]/section/div[2]/div/div/div[2]/div/div/div/textarea')))
-            time.sleep(random.uniform(2, 4))
+            time.sleep(random.uniform(5, 10))
             print("[info...] type the input now ")
             message = "Hello There, How are you."
             for ch in message:
                 input_field.send_keys(ch)
                 time.sleep(0.5)
-            time.sleep(random.uniform(2, 10))
+            time.sleep(random.uniform(5, 10))
             button_send = WebDriverWait(bot, TIMEOUT).until(
                 ec.presence_of_element_located((
                     By.XPATH, '//*[@id="react-root"]/section/div[2]/div/div/div[2]/div/div/div[2]/button')))
