@@ -7,14 +7,46 @@ from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
 from webdriver_manager.chrome import ChromeDriverManager as CM
+from configparser import ConfigParser
+
+###################################
+
+config_object = ConfigParser()
+
+config_object.read("confg.ini")
+
+# Get the password
+
+userinfo = config_object["USERINFO"]
 
 # Complete these 2 fields ==================
-USERNAME = input('[info account] put your email or username:')
-PASSWORD = input('[info account] put your password here:')
+USERNAME = format(userinfo["put your Email or username"])
+PASSWORD = format(userinfo["put your Password here"])
 # ==========================================
 
 TIMEOUT = 15
+print("""________00000000000___________000000000000________
+______00000000_____00000___000000_____0000000______
+____0000000_____________000______________00000_____
+___0000000_______________0_________________0000____
+__000000____________________________________0000___
+__00000_____________________________________ 0000__
+_00000______________________________________00000__
+_00000_____________________________________000000__
+__000000_________________________________0000000___
+___0000000______________________________0000000____
+_____000000____________________________000000______
+_______000000________________________000000________
+__________00000_____________________0000___________
+_____________0000_________________0000_____________
+_______________0000_____________000________________
+_________________000_________000___________________
+_________________ __000_____00_____________________
+______________________00__00_______________________
+""")
+config_object = ConfigParser()
 
+config_object.read("confg.ini")
 
 # CREATING DATABASE
 def createdb():
@@ -48,8 +80,8 @@ def insertdb(id, name, sent):
 
 def scrape():
     createdb()
-    usr = input('[Required] - Whose followers do you want to scrape: ')
-    user_input = int(input('[Required] - How many followers do you want to scrape (60-1000 recommended): '))
+    usr = format(userinfo["Whose followers do you want to scrape"])
+    user_input = int(input('[Required] - How many followers do you want to scrape (60-10K recommended): '))
 
     options = webdriver.ChromeOptions()
     options.add_argument('--no-sandbox')
