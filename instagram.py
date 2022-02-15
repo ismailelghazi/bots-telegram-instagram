@@ -8,6 +8,7 @@ from configparser import ConfigParser
 import sqlite3
 import time
 import random
+from run import scrape
 
 TIMEOUT = 60
 
@@ -132,4 +133,5 @@ def login():
 
 
 if __name__ == '__main__':
+    scrape()
     login()
