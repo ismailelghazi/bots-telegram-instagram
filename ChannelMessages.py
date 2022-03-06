@@ -1,96 +1,100 @@
+from telethon.sync import TelegramClient
+from telethon.tl.functions.messages import GetDialogsRequest
+from telethon.tl.types import InputPeerEmpty
+import os, sys
 import configparser
-import json
-import asyncio
-from datetime import date, datetime
+import csv
+import time
 
-from telethon import TelegramClient
-from telethon.errors import SessionPasswordNeededError
-from telethon.tl.functions.messages import (GetHistoryRequest)
-from telethon.tl.types import (
-    PeerChannel
-)
+re = "\033[1;31m"
+gr = "\033[1;32m"
+cy = "\033[1;36m"
 
 
-# some functions to parse json date
-class DateTimeEncoder(json.JSONEncoder):
-    def default(self, o):
-        if isinstance(o, datetime):
-            return o.isoformat()
-
-        if isinstance(o, bytes):
-            return list(o)
-
-        return json.JSONEncoder.default(self, o)
+def banner():
+    print(f"""
+{re}???{cy}????  ???{re}???  ???{cy}??????????????????
+{re} ? {cy}?? ?  ?? {re}? ?  ???{cy}?  ??????????? ???
+{re} ? {cy}?????????{re}???  ???{cy}??????? ??  ??????
+        """)
 
 
-# Reading Configs
-config = configparser.ConfigParser()
-config.read("config-sample.ini")
+cpass = configparser.RawConfigParser()
+cpass.read('config.data')
 
-# Setting configuration values
-api_id = config['Telegram']['api_id']
-api_hash = config['Telegram']['api_hash']
+try:
+    api_id = 16692973
+    api_hash = '4688ac1027344e3d78b3bddf1ce739e8'
+    name='Isma Isma'
+    client =  TelegramClient(name, api_id, api_hash)
+except KeyError:
+    os.system('clear')
+    banner()
+    print(re + "[!] run python3 setup.py first !!\n")
+    sys.exit(1)
 
-api_hash = str(api_hash)
+client.connect()
+if not client.is_user_authorized():
+    client.send_code_request(name)
+    os.system('clear')
+    banner()
+    client.sign_in(name, input(gr + '[+] Enter the code: ' + re))
 
-phone = config['Telegram']['phone']
-username = config['Telegram']['username']
+os.system('clear')
+banner()
+chats = []
+last_date = None
+chunk_size = 200
+groups = []
 
-# Create the client and connect
-client = TelegramClient(username, api_id, api_hash)
+result = client(GetDialogsRequest(
+    offset_date=last_date,
+    offset_id=0,
+    offset_peer=InputPeerEmpty(),
+    limit=chunk_size,
+    hash=0
+))
+chats.extend(result.chats)
 
-async def main(phone):
-    await client.start()
-    print("Client Created")
-    # Ensure you're authorized
-    if await client.is_user_authorized() == False:
-        await client.send_code_request(phone)
-        try:
-            await client.sign_in(phone, input('Enter the code: '))
-        except SessionPasswordNeededError:
-            await client.sign_in(password=input('Password: '))
+for chat in chats:
+    try:
+        if chat.megagroup == True:
+            groups.append(chat)
+    except:
+        continue
 
-    me = await client.get_me()
+print(gr + '[+] Choose a group to scrape members :' + re)
+i = 0
+# for g in groups:
+#     print('['+str(i)+']'+' - ' + g.title)
+#     i += 1
+print('')
+g_index = input(gr + "[+] Enter a Number : " + re)
+target_group = groups[int(g_index)]
 
-    user_input_channel = input('enter entity(telegram URL or entity id):')
+print(gr + '[+] Fetching Members...')
+time.sleep(30)
+all_participants = []
+all_participants = client.get_participants(target_group, aggressive=True,limit=2000)
 
-    if user_input_channel.isdigit():
-        entity = PeerChannel(int(user_input_channel))
-    else:
-        entity = user_input_channel
-
-    my_channel = await client.get_entity(entity)
-
-    offset_id = 0
-    limit = 100
-    all_messages = []
-    total_messages = 0
-    total_count_limit = 0
-
-    while True:
-        print("Current Offset ID is:", offset_id, "; Total Messages:", total_messages)
-        history = await client(GetHistoryRequest(
-            peer=my_channel,
-            offset_id=offset_id,
-            offset_date=None,
-            add_offset=0,
-            limit=limit,
-            max_id=0,
-            min_id=0,
-            hash=0
-        ))
-        if not history.messages:
-            break
-        messages = history.messages
-        for message in messages:
-            all_messages.append(message.to_dict())
-        offset_id = messages[len(messages) - 1].id
-        total_messages = len(all_messages)
-        if total_count_limit != 0 and total_messages >= total_count_limit:
-            break
-
-    with open('channel_messages.json', 'w') as outfile:
-        json.dump(all_messages, outfile, cls=DateTimeEncoder)
-
-with client:
-    client.loop.run_until_complete(main(phone))
+print(gr + '[+] Saving In file...')
+time.sleep(1)
+with open("members.csv", "w", encoding='UTF-8') as f:
+    writer = csv.writer(f, delimiter=",", lineterminator="\n")
+    writer.writerow(['username', 'user id', 'access hash', 'name', 'group', 'group id'])
+    for user in all_participants:
+        if user.username:
+            username = user.username
+        else:
+            username = ""
+        if user.first_name:
+            first_name = user.first_name
+        else:
+            first_name = ""
+        if user.last_name:
+            last_name = user.last_name
+        else:
+            last_name = ""
+        name = (first_name + ' ' + last_name).strip()
+        writer.writerow([username, user.id, user.access_hash, name, target_group.title, target_group.id])
+print(gr + '[+] Members scraped successfully.')
