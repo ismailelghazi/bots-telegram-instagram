@@ -40,7 +40,6 @@ if not client.is_user_authorized():
     banner()
     client.sign_in(name, input(gr + '[+] Enter the code: ' + re))
 
-os.system('clear')
 banner()
 chats = []
 last_date = None
@@ -62,20 +61,23 @@ for chat in chats:
             groups.append(chat)
     except:
         continue
-
+print(chats)
 print(gr + '[+] Choose a group to scrape members :' + re)
 i = 0
-# for g in groups:
-#     print('['+str(i)+']'+' - ' + g.title)
-#     i += 1
-print('')
+try:
+    for g in groups:
+        print('['+str(i)+']'+' - ' + g.title)
+        i += 1
+except:
+    pass
+print(chats)
 g_index = input(gr + "[+] Enter a Number : " + re)
 target_group = groups[int(g_index)]
 
 print(gr + '[+] Fetching Members...')
 time.sleep(30)
 all_participants = []
-all_participants = client.get_participants(target_group, aggressive=True,limit=2000)
+all_participants = client.get_participants(target_group, aggressive=True, limit=200000)
 
 print(gr + '[+] Saving In file...')
 time.sleep(1)
